@@ -2,7 +2,7 @@ import streamlit as st
 import PyPDF2
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings  # updated import
 from groq import Groq
 import os
 from dotenv import load_dotenv
@@ -11,14 +11,14 @@ import uuid
 load_dotenv()
 
 # ===== Initialize session state =====
-if "messages" not in st.session_state:
-    st.session_state["messages"] = []
-if "db" not in st.session_state:
-    st.session_state["db"] = None
-if "last_file_name" not in st.session_state:
-    st.session_state["last_file_name"] = None
-if "query_input" not in st.session_state:
-    st.session_state["query_input"] = ""
+for key, default in {
+    "messages": [],
+    "db": None,
+    "last_file_name": None,
+    "query_input": ""
+}.items():
+    if key not in st.session_state:
+        st.session_state[key] = default
 
 # Title and description
 st.title("📄 PDF/TXT Q&A Chatbot")
@@ -36,9 +36,7 @@ if uploaded_file is not None:
         ]
         st.session_state["query_input"] = ""
         st.session_state["last_file_name"] = uploaded_file.name
-
-        # Clear previous vector DB safely
-        st.session_state["db"] = None
+        st.session_state["db"] = None  # clear previous DB
 
     # Extract text from file
     if uploaded_file.type == "application/pdf":
@@ -50,17 +48,19 @@ if uploaded_file is not None:
     st.write("✅ File uploaded successfully!")
     st.write(text[:500] + "...")  # preview first 500 characters
 
-    # Create a new in-memory vector DB for this document
-    
+    # Split text and create vector DB
     splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
     docs = splitter.split_text(text)
 
     embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+
+    # Use DuckDB+Parquet to avoid SQLite issues
     st.session_state["db"] = Chroma.from_texts(
         docs,
         embedding=embeddings,
         collection_name=f"session_{uuid.uuid4().hex}",
-        persist_directory=None  # in-memory DB, not saved to disk
+        persist_directory=None,  # in-memory DB
+        client_settings={"chroma_db_impl": "duckdb+parquet"}
     )
 
     st.write("✅ Vector store created")
@@ -77,7 +77,7 @@ def ask_question():
 
         # Retrieve relevant documents
         retriever = st.session_state["db"].as_retriever(search_kwargs={"k": 5})
-        results = retriever.invoke(query)
+        results = retriever.get_relevant_documents(query)  # updated for latest LangChain
         context = "\n".join([doc.page_content for doc in results])
 
         # Create prompt
@@ -112,10 +112,9 @@ Answer:
 # Display chat history
 for msg in st.session_state.get("messages", [])[1:]:
     if msg["role"] == "user":
-        st.markdown(f"👤 **Question :** {msg['content']}")
+        st.markdown(f"👤 **Question:** {msg['content']}")
     elif msg["role"] == "assistant":
-        st.markdown(f"🤖 **Answer :** {msg['content']}")
+        st.markdown(f"🤖 **Answer:** {msg['content']}")
 
 # Question input at the bottom like ChatGPT
 st.text_input("Ask a question about the document:", key="query_input", on_change=ask_question)
-
