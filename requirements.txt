@@ -5,9 +5,8 @@ markdown-it-py==4.0.0
 pygments==2.19.2
 mdurl==0.1.2
 PyPDF2==3.0.1
-langchain==1.0.0
+langchain==0.3.27
 chromadb==1.0.20
 sentence-transformers==2.2.2
 python-dotenv==1.0.0
 groq==0.2.1
-
