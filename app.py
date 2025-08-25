@@ -2,7 +2,7 @@ import streamlit as st
 import PyPDF2
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
-from langchain.embeddings import HuggingFaceEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from groq import Groq
 import os
 from dotenv import load_dotenv
