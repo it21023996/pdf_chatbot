@@ -1,33 +1,34 @@
-# Core packages
-pip>=25.2
-streamlit==1.48.1
-rich==14.1.0
-markdown-it-py==4.0.0
-pygments==2.19.2
-mdurl==0.1.2
-PyPDF2==3.0.1
+# Core
+streamlit
+rich
+markdown-it-py
+pygments
+mdurl
+PyPDF2
 
-# LangChain
-langchain==0.3.27
-langchain-community==0.3.27
-chromadb==1.0.20
+# LangChain + Vector DB
+langchain
+langchain-community
+langchain-huggingface
+chromadb
 
-# HuggingFace embeddings
-sentence-transformers>=2.3.0
-transformers>=4.35.0
-torch>=2.8.0
-huggingface-hub>=0.20.0
-torchvision>=0.15.2
-sentencepiece>=0.1.99
+# HuggingFace + Torch
+sentence-transformers
+transformers
+torch
+torchvision
+huggingface-hub
+sentencepiece
 
 # Utilities
-python-dotenv==1.0.0
-groq==0.31.0
-tqdm==4.67.1
-scipy>=1.10.1
-numpy>=1.25.0
-scikit-learn>=1.3.0
-nltk>=3.9.1
+python-dotenv
+groq
+tqdm
+scipy
+numpy
+scikit-learn
+nltk
+
 
 
 
